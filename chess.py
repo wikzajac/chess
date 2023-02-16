@@ -8,7 +8,10 @@ import re
 
 
 class Chess:
-    """Chess board as dictionaries"""
+    """
+    Chess board game in terminal
+
+    """
 
     def __init__(self):
         """
@@ -22,10 +25,10 @@ class Chess:
         self.count = 0
 
         # Initiates board
-        self.board_init()
+        self.board = self.board_init()
 
         # Initiates starting positions on board
-        self.setup()
+        self.board = self.setup(self.board)
 
         # Main players combat
         self.game()
@@ -72,40 +75,41 @@ class Chess:
         for i in ["a", "b", "c", "d", "e", "f", "g", "h"]:
             for j in range(1, 9):
                 coordinates_list.append(i + str(j))
-        self.board = dict.fromkeys(coordinates_list)
+        return dict.fromkeys(coordinates_list)
 
-    def setup(self):
+    def setup(self, board):
         """
         Set up chess board
         board dictionary store piece as value
 
-        :return: A dict
+        :return: chess board as a dict
         :rtype: dict
         """
 
         # Setup white pieces
-        self.board["e1"] = self.King("white")
-        self.board["d1"] = self.Queen("white")
+        board["e1"] = King("white")
+        board["d1"] = Queen("white")
         for pos in ["a1", "h1"]:
-            self.board[pos] = self.Rook("white")
+            board[pos] = Rook("white")
         for pos in ["c1", "f1"]:
-            self.board[pos] = self.Bishop("white")
+            board[pos] = Bishop("white")
         for pos in ["b1", "g1"]:
-            self.board[pos] = self.Knight("white")
+            board[pos] = Knight("white")
         for pos in ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"]:
-            self.board[pos] = self.Pawn("white")
+            board[pos] = Pawn("white")
 
         # Setup black pieces
-        self.board["e8"] = self.King("black")
-        self.board["d8"] = self.Queen("black")
+        board["e8"] = King("black")
+        board["d8"] = Queen("black")
         for pos in ["a8", "h8"]:
-            self.board[pos] = self.Rook("black")
+            board[pos] = Rook("black")
         for pos in ["c8", "f8"]:
-            self.board[pos] = self.Bishop("black")
+            board[pos] = Bishop("black")
         for pos in ["b8", "g8"]:
-            self.board[pos] = self.Knight("black")
+            board[pos] = Knight("black")
         for pos in ["a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"]:
-            self.board[pos] = self.Pawn("black")
+            board[pos] = Pawn("black")
+        return board
 
     def print_board(self):
         """
@@ -138,6 +142,8 @@ class Chess:
     def team_round(self):
         """
         Function check current team
+        :return current team
+        :rtype str
         """
         if self.count % 2 == 0:
             team = "white"
@@ -153,7 +159,7 @@ class Chess:
             correct piece name
             correct coordinate
 
-            :return list of strings [piece, start, end, team]
+            :return list of strings [piece, start, end]
             :rtype list
         """
 
@@ -176,7 +182,8 @@ class Chess:
                 break
 
             # Accept only correct piece name
-            if piece not in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
+            if piece not in ["king", "queen", "rook",
+                             "bishop", "knight", "pawn"]:
                 print(f"{piece} is not chess piece")
                 print("Usage: king, queen, rook, bishop, knight, pawn")
                 break
@@ -212,7 +219,7 @@ class Chess:
             if not self.board[start].character == piece:
                 print(f"{piece} is not in {start}")
                 break
-            return [piece, start, end, team]
+            return [piece, start, end]
         return 1
 
     def move(self):
@@ -221,7 +228,7 @@ class Chess:
         Analize by ability function is it posible to get end position.
         Piece can make move or capture oponent piece.
         """
-
+        
         prompt = self.prompt()
         if prompt == "exit":
             return "exit"
@@ -229,10 +236,10 @@ class Chess:
         if prompt == 1:
             return 1
 
-        piece, start, end, team = prompt
+        piece, start, end = prompt
 
         posibility_moves, posibility_takens = self.board[start].ability(
-            start, self.board, team
+            start, self.board
         )
         if end in posibility_moves:
             step = self.board[start]
@@ -277,356 +284,356 @@ class Chess:
             for line in self.moves:
                 print(line)
 
-    class Piece:
+
+class Piece:
+    """
+    Main class for all pieces in board
+    """
+
+    def __init__(self, team, character):
+        self.team = team
+        self.character = character
+
+    def __str__(self):
+        return f"{self.team} {self.character}"
+
+    @property
+    def team(self):
+        """team getter and setter"""
+        return self._team
+
+    @team.setter
+    def team(self, team):
+        if team not in ["white", "black"]:
+            raise ValueError("Invalid team")
+        self._team = team
+
+    @property
+    def character(self):
+        """character getter and setter"""
+        return self._character
+
+    @character.setter
+    def character(self, character):
+        characters = ["king", "queen", "rook", "bishop", "knight", "pawn"]
+        if character not in characters:
+            raise ValueError("Invalid character")
+        self._character = character
+
+    @classmethod
+    def convert_to_numeric(cls, pos: str) -> list:
         """
-        Main class for all pieces in board
+        Convert clasic chess coordinates to numeric coordinates
+        e.g. d4 to [4, 4]
+        :return numeric coordinate
+        :rtype list of two intiger
+        """
+        num = ord(pos[0]) - 96
+        return [num, int(pos[1])]
+
+    @classmethod
+    def convert_to_alpha(cls, pos: str) -> str:
+        """
+        Convert numeric coordinates to clasic chess coordinates
+        e.g. [4, 4] to d4
+        :return clasic chees coordinates
+        :rtype string
+        """
+        alpha = chr(int(pos[0]) + 96)
+        return alpha + str(pos[1])
+
+    @classmethod
+    def sum_coordinates(cls, pos1: list, pos2: list) -> list:
+        """
+        add numeric coordinates and delta
+        :return sum of coordinates
+        :rtype list of two intiger
+        """
+        pos3 = []
+        pos3.append(pos1[0] + pos2[0])
+        pos3.append(pos1[1] + pos2[1])
+        return pos3
+
+    def is_it_in_board(self, pos_numeric: list) -> bool:
+        """
+        Check if coordinates is in board
+        e.g. [1, 1] -> True, [9, 8] -> False
+        :rtype boolean
+        """
+        if pos_numeric[0] > 0:
+            if pos_numeric[0] < 9:
+                if pos_numeric[1] > 0:
+                    if pos_numeric[1] < 9:
+                        return True
+        return False
+
+    def posible_moves(self, start: str, board: dict,
+                      deltas: list, mrange: int) -> list:
+        """
+        Check posible moves or posible taken for piece
+        :return two list of clasic chess coordinates.
+        :rtype list of strings
         """
 
-        def __init__(self, team, character):
-            self.team = team
-            self.character = character
+        start_numeric = self.convert_to_numeric(start)
+        moves = []
+        takens = []
+        for delta in deltas:
+            step = [None, None]
+            step[0] = int(delta[0])
+            step[1] = int(delta[1])
+            copy_mrange = mrange
+            while copy_mrange != 0:
+                # piece range
+                copy_mrange = copy_mrange - 1
+                # move one step
+                posible_pos = self.sum_coordinates(start_numeric, step)
+                posible_pos_alpha = self.convert_to_alpha(posible_pos)
 
-        def __str__(self):
-            return f"{self.team} {self.character}"
+                # step for next iteration
+                step[0] = step[0] + delta[0]
+                step[1] = step[1] + delta[1]
 
-        @property
-        def team(self):
-            """team getter and setter"""
-            return self._team
-
-        @team.setter
-        def team(self, team):
-            if team not in ["white", "black"]:
-                raise ValueError("Invalid team")
-            self._team = team
-
-        @property
-        def character(self):
-            """character getter and setter"""
-            return self._character
-
-        @character.setter
-        def character(self, character):
-            characters = ["king", "queen", "rook", "bishop", "knight", "pawn"]
-            if character not in characters:
-                raise ValueError("Invalid character")
-            self._character = character
-
-        def convert_to_numeric(self, pos):
-            """
-            Convert clasic chess coordinates to numeric coordinates
-            e.g. d4 to [4, 4]
-            :return numeric coordinate
-            :rtype list of two intiger
-            """
-            num = ord(pos[0]) - 96
-            return [num, int(pos[1])]
-
-        def convert_to_alpha(self, pos):
-            """
-            Convert numeric coordinates to clasic chess coordinates
-            e.g. [4, 4] to d4
-            :return clasic chees coordinates
-            :rtype string
-            """
-            alpha = chr(int(pos[0]) + 96)
-            return alpha + str(pos[1])
-
-        def sum_coordinates(self, pos1, pos2):
-            """
-            add numeric coordinates and delta
-            :return sum of coordinates
-            :rtype list of two intiger
-            """
-            pos3 = []
-            pos3.append(pos1[0] + pos2[0])
-            pos3.append(pos1[1] + pos2[1])
-            return pos3
-
-        def is_it_in_board(self, pos_numeric):
-            """
-            Check if coordinates is in board
-            e.g. [1, 1] -> True, [9, 8] -> False
-            :rtype boolean
-            """
-            if pos_numeric[0] > 0:
-                if pos_numeric[0] < 9:
-                    if pos_numeric[1] > 0:
-                        if pos_numeric[1] < 9:
-                            return True
-            return False
-
-        def posible_moves(self, start, board, team, deltas, mrange):
-            """
-            Check posible moves or posible taken for piece
-            :return two list of clasic chess coordinates.
-            :rtype list of strings
-            """
-
-            start_numeric = self.convert_to_numeric(start)
-            moves = []
-            takens = []
-            for delta in deltas:
-                step = [None, None]
-                step[0] = int(delta[0])
-                step[1] = int(delta[1])
-                copy_mrange = mrange
-                while copy_mrange != 0:
-                    # piece range
-                    copy_mrange = mrange - 1
-                    # move one step
-                    posible_position = self.sum_coordinates(start_numeric, step)
-                    posible_position_alpha = self.convert_to_alpha(posible_position)
-
-                    # step for next iteration
-                    step[0] = step[0] + delta[0]
-                    step[1] = step[1] + delta[1]
-
-                    # check is it in board
-                    if self.is_it_in_board(posible_position):
-                        pass
-                    else:
-                        break
-                    # check is it None
-                    if board[posible_position_alpha] is None:
-                        moves.append(posible_position)
-                    elif not board[posible_position_alpha].team == team:
-                        takens.append(posible_position)
-                        break
-                    else:
-                        break
-
-            alpha_moves = []
-            for move in moves:
-                alpha_moves.append(self.convert_to_alpha(move))
-
-            alpha_takens = []
-            for taken in takens:
-                alpha_takens.append(self.convert_to_alpha(taken))
-
-            return alpha_moves, alpha_takens
-
-    class King(Piece):
-        """King piece"""
-
-        def __init__(self, team, character="king"):
-            super().__init__(team, character)
-
-        def __str__(self):
-            if self.team == "white":
-                return "♔"
-            return "♚"
-
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            deltas = [
-                [1, 1],
-                [0, 1],
-                [-1, 1],
-                [-1, 0],
-                [-1, -1],
-                [0, -1],
-                [1, -1],
-                [1, 0],
-            ]
-            mrange = 1
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-
-            return alpha_moves, alpha_takens
-
-    class Queen(Piece):
-        """Queen piece"""
-
-        def __init__(self, team, character="queen"):
-            super().__init__(team, character)
-
-        def __str__(self):
-            if self.team == "white":
-                return "♕"
-            return "♛"
-
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            deltas = [
-                [1, 1],
-                [0, 1],
-                [-1, 1],
-                [-1, 0],
-                [-1, -1],
-                [0, -1],
-                [1, -1],
-                [1, 0],
-            ]
-            mrange = 8
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-
-            return alpha_moves, alpha_takens
-
-    class Rook(Piece):
-        """Rook piece"""
-
-        def __init__(self, team, character="rook"):
-            super().__init__(team, character)
-
-        def __str__(self):
-            if self.team == "white":
-                return "♖"
-            return "♜"
-
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            deltas = [[0, 1], [-1, 0], [0, -1], [1, 0]]
-            mrange = 8
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-
-            return alpha_moves, alpha_takens
-
-    class Bishop(Piece):
-        """Bishop piece"""
-
-        def __init__(self, team, character="bishop"):
-            super().__init__(team, character)
-
-        def __str__(self):
-            if self.team == "white":
-                return "♗"
-            return "♝"
-
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            deltas = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-            mrange = 8
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-            return alpha_moves, alpha_takens
-
-    class Knight(Piece):
-        """Knight piece"""
-
-        def __init__(self, team, character="knight"):
-            super().__init__(team, character)
-
-        def __str__(self):
-            if self.team == "white":
-                return "♘"
-            return "♞"
-
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            deltas = [
-                [1, 2],
-                [2, 1],
-                [2, -1],
-                [1, -2],
-                [-1, -2],
-                [-2, -1],
-                [-2, 1],
-                [-1, 2],
-            ]
-            mrange = 1
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-
-            return alpha_moves, alpha_takens
-
-    class Pawn(Piece):
-        """Pawn piece"""
-
-        def __init__(self, team, character="pawn"):
-            super().__init__(team, character)
-
-            self.turn = 0
-
-        def __str__(self):
-            if self.team == "white":
-                return "♙"
-            return "♟"
-
-        @property
-        def turn(self):
-            """turn getter and setter"""
-            return self._turn
-
-        @turn.setter
-        def turn(self, turn):
-            self._turn = turn
-
-        def posible_taken(self, start, board, team):
-            """
-            Check posible posible taken for pawn
-            :return list of clasic chess coordinates.
-            :rtype list of strings
-            """
-            start_numeric = self.convert_to_numeric(start)
-            takens = []
-            if team == "white":
-                deltas = [[-1, 1], [1, 1]]
-            else:
-                deltas = [[1, -1], [-1, -1]]
-
-            for delta in deltas:
-                posible_taken = self.sum_coordinates(start_numeric, delta)
-                posible_taken_alpha = self.convert_to_alpha(posible_taken)
                 # check is it in board
-                if self.is_it_in_board(posible_taken):
-                    # Check is it empty square
-                    if not board[posible_taken_alpha] is None:
-                        # Check is it oponent
-                        if not board[posible_taken_alpha].team == team:
-                            takens.append(posible_taken)
+                if self.is_it_in_board(posible_pos):
+                    pass
+                else:
+                    break
+                # check is it None
+                if board[posible_pos_alpha] is None:
+                    moves.append(posible_pos)
+                elif not board[posible_pos_alpha].team == self.team:
+                    takens.append(posible_pos)
+                    break
+                else:
+                    break
 
-            alpha_takens = []
-            for taken in takens:
-                alpha_takens.append(self.convert_to_alpha(taken))
+        moves = [self.convert_to_alpha(move) for move in moves]
+        takens = [self.convert_to_alpha(taken) for taken in takens]
 
-            return alpha_takens
+        return moves, takens
 
-        def ability(self, start, board, team):
-            """
-            Check ability for taken and moves.
-            Variable with piece range and piece directions
-            """
-            if team == "white":
-                deltas = [[0, 1]]
-            else:
-                deltas = [[0, -1]]
 
-            # Dubble first move
-            if self.turn == 0:
-                mrange = 2
-            else:
-                mrange = 1
+class King(Piece):
+    """King piece"""
 
-            self.turn += 1
+    def __init__(self, team, character="king"):
+        super().__init__(team, character)
 
-            alpha_moves, alpha_takens = self.posible_moves(
-                start, board, team, deltas, mrange
-            )
-            alpha_takens = self.posible_taken(start, board, team)
-            return alpha_moves, alpha_takens
+    def __str__(self):
+        if self.team == "white":
+            return "♔"
+        return "♚"
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        deltas = [
+            [1, 1],
+            [0, 1],
+            [-1, 1],
+            [-1, 0],
+            [-1, -1],
+            [0, -1],
+            [1, -1],
+            [1, 0],
+        ]
+        mrange = 1
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+
+        return alpha_moves, alpha_takens
+
+
+class Queen(Piece):
+    """Queen piece"""
+
+    def __init__(self, team, character="queen"):
+        super().__init__(team, character)
+
+    def __str__(self):
+        if self.team == "white":
+            return "♕"
+        return "♛"
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        deltas = [
+            [1, 1],
+            [0, 1],
+            [-1, 1],
+            [-1, 0],
+            [-1, -1],
+            [0, -1],
+            [1, -1],
+            [1, 0],
+        ]
+        mrange = 8
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+
+        return alpha_moves, alpha_takens
+
+
+class Rook(Piece):
+    """Rook piece"""
+
+    def __init__(self, team, character="rook"):
+        super().__init__(team, character)
+
+    def __str__(self):
+        if self.team == "white":
+            return "♖"
+        return "♜"
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        deltas = [[0, 1], [-1, 0], [0, -1], [1, 0]]
+        mrange = 8
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+
+        return alpha_moves, alpha_takens
+
+
+class Bishop(Piece):
+    """Bishop piece"""
+
+    def __init__(self, team, character="bishop"):
+        super().__init__(team, character)
+
+    def __str__(self):
+        if self.team == "white":
+            return "♗"
+        return "♝"
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        deltas = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+        mrange = 8
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+        return alpha_moves, alpha_takens
+
+
+class Knight(Piece):
+    """Knight piece"""
+
+    def __init__(self, team, character="knight"):
+        super().__init__(team, character)
+
+    def __str__(self):
+        if self.team == "white":
+            return "♘"
+        return "♞"
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        deltas = [
+            [1, 2],
+            [2, 1],
+            [2, -1],
+            [1, -2],
+            [-1, -2],
+            [-2, -1],
+            [-2, 1],
+            [-1, 2],
+        ]
+        mrange = 1
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+
+        return alpha_moves, alpha_takens
+
+
+class Pawn(Piece):
+    """Pawn piece"""
+
+    def __init__(self, team, character="pawn"):
+        super().__init__(team, character)
+
+        self.turn = 0
+
+    def __str__(self):
+        if self.team == "white":
+            return "♙"
+        return "♟"
+
+    @property
+    def turn(self):
+        """turn getter and setter"""
+        return self._turn
+
+    @turn.setter
+    def turn(self, turn):
+        self._turn = turn
+
+    def posible_taken(self, start: str, board: dict) -> list:
+        """
+        Check posible posible taken for pawn
+        :return list of clasic chess coordinates.
+        :rtype list of strings
+        """
+        start_numeric = self.convert_to_numeric(start)
+        takens = []
+        if self.team == "white":
+            deltas = [[-1, 1], [1, 1]]
+        else:
+            deltas = [[1, -1], [-1, -1]]
+
+        for delta in deltas:
+            posible_taken = self.sum_coordinates(start_numeric, delta)
+            posible_taken_alpha = self.convert_to_alpha(posible_taken)
+            # check is it in board
+            if self.is_it_in_board(posible_taken):
+                # Check is it empty square
+                if not board[posible_taken_alpha] is None:
+                    # Check is it oponent
+                    if not board[posible_taken_alpha].team == self.team:
+                        takens.append(posible_taken)
+
+        alpha_takens = []
+        for taken in takens:
+            alpha_takens.append(self.convert_to_alpha(taken))
+
+        return alpha_takens
+
+    def ability(self, start: str, board: dict) -> list:
+        """
+        Check ability for taken and moves.
+        Variable with piece range and piece directions
+        """
+        if self.team == "white":
+            deltas = [[0, 1]]
+        else:
+            deltas = [[0, -1]]
+
+        # Dubble first move
+        if self.turn == 0:
+            mrange = 2
+        else:
+            mrange = 1
+
+        self.turn += 1
+
+        alpha_moves, alpha_takens = self.posible_moves(
+            start, board, deltas, mrange)
+        alpha_takens = self.posible_taken(start, board)
+        return alpha_moves, alpha_takens
 
 
 def main():
