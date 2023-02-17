@@ -1,9 +1,10 @@
 # Chess
+Play chess in your terminal.
 <img
   src="https://github.com/wikzajac/chess/blob/master/start%20game.png"
   alt="start game"
-  style="display: inline-block; float: right; margin: 0 auto; max-width: 300px">
-Play chess in your terminal.
+  style="display: inline; float: right; margin: 0 auto; max-width: 300px">
+
 
 ## Instalation
 
