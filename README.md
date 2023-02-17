@@ -28,7 +28,7 @@ Below you can find the list of the functionalities that I have implemented:
 * team track
 * capture enemy
 
-## test run
+## Test run
 
 To run test type:
 
