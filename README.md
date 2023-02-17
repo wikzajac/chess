@@ -1,11 +1,6 @@
 # Chess
 
 Play chess in your terminal.
-<img
-  src="https://github.com/wikzajac/chess/blob/master/start%20game.png"
-  alt="start game"
-  style="display: inline-block; float: right; margin: 0 auto; max-width: 300px">
-
 
 ## Instalation
 
@@ -32,6 +27,20 @@ Below you can find the list of the functionalities that I have implemented:
 * only correct move accepted
 * team track
 * capture enemy
+
+## test run
+
+To run test type:
+
+```bash
+pytest test_twttr.py
+```
+
+or: 
+
+```bash
+python -m pytest test_chess.py
+```
 
 ## TODO
 

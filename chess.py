@@ -42,7 +42,7 @@ class Chess:
         return self._board
 
     @board.setter
-    def board(self, board):
+    def board(self, board: dict):
         self._board = board
 
     @property
@@ -51,7 +51,7 @@ class Chess:
         return self._count
 
     @count.setter
-    def count(self, count):
+    def count(self, count: int):
         self._count = count
 
     @property
@@ -60,13 +60,12 @@ class Chess:
         return self._notation
 
     @notation.setter
-    def notation(self, notation):
+    def notation(self, notation: str):
         self._notation = notation
 
     def board_init(self):
         """
-        Create chess board
-        keys coordinates from coordinates_list
+        Create empty chess board
 
         :return: A dict
         :rtype: dict
@@ -77,7 +76,7 @@ class Chess:
                 coordinates_list.append(i + str(j))
         return dict.fromkeys(coordinates_list)
 
-    def setup(self, board):
+    def setup(self, board: dict):
         """
         Set up chess board
         board dictionary store piece as value
@@ -241,21 +240,23 @@ class Chess:
             start, self.board
         )
         if end in posibility_moves:
+            category = ''
             step = self.board[start]
             self.board[end] = step
             self.board[start] = None
 
             # Add move to history
-            self.ad_notation(piece_id, start, end)
+            self.ad_notation(piece_id, start, end, category)
             self.count += 1
             return None
         if end in posibility_takens:
+            category = 'x'
             step = self.board[start]
             self.board[end] = step
             self.board[start] = None
 
             # Add move to history
-            self.ad_notation(piece_id, start, end)
+            self.ad_notation(piece_id, start, end, category)
             self.count += 1
             return None
         print(f"{piece} can not do that for you")
@@ -271,9 +272,9 @@ class Chess:
             if self.move() == "exit":
                 break
 
-    def ad_notation(self, piece_id, start, end):
+    def ad_notation(self, piece_id: str, start: str, end: str, category: str):
         """ add move to notation """
-        self.notation.append(f'{piece_id}{start[0]}{end}')
+        self.notation.append(f'{category}{piece_id}{start[0]}{end}')
 
     def print_notation(self):
         """
@@ -293,12 +294,10 @@ class Piece:
     Main class for all pieces in board
     """
 
-    def __init__(self, team, character):
+    def __init__(self, team: str, character: str, piece_id: str):
         self.team = team
         self.character = character
-
-    def __str__(self):
-        return f"{self.team} {self.character}"
+        self.piece_id = piece_id
 
     @property
     def team(self):
@@ -306,7 +305,7 @@ class Piece:
         return self._team
 
     @team.setter
-    def team(self, team):
+    def team(self, team: str):
         if team not in ["white", "black"]:
             raise ValueError("Invalid team")
         self._team = team
@@ -317,11 +316,23 @@ class Piece:
         return self._character
 
     @character.setter
-    def character(self, character):
+    def character(self, character: str):
         characters = ["king", "queen", "rook", "bishop", "knight", "pawn"]
         if character not in characters:
             raise ValueError("Invalid character")
         self._character = character
+    
+    @property
+    def piece_id(self):
+        """turn getter and setter"""
+        return self._piece_id
+
+    @piece_id.setter
+    def piece_id(self, piece_id: str):
+        ids = ['K', 'Q', 'R', 'B', 'N', '']
+        if piece_id not in ids:
+            raise ValueError("Invalid id")
+        self._piece_id = piece_id
 
     @classmethod
     def convert_to_numeric(cls, pos: str) -> list:
@@ -420,10 +431,8 @@ class Piece:
 class King(Piece):
     """King piece"""
 
-    piece_id = 'K'
-
-    def __init__(self, team, character="king"):
-        super().__init__(team, character)
+    def __init__(self, team, character="king", piece_id = 'K'):
+        super().__init__(team, character, piece_id)
 
     def __str__(self):
         if self.team == "white":
@@ -455,10 +464,8 @@ class King(Piece):
 class Queen(Piece):
     """Queen piece"""
 
-    piece_id = 'Q'
-
-    def __init__(self, team, character="queen"):
-        super().__init__(team, character)
+    def __init__(self, team, character="queen", piece_id = 'Q'):
+        super().__init__(team, character, piece_id)
 
     def __str__(self):
         if self.team == "white":
@@ -490,10 +497,8 @@ class Queen(Piece):
 class Rook(Piece):
     """Rook piece"""
 
-    piece_id = 'R'
-
-    def __init__(self, team, character="rook"):
-        super().__init__(team, character)
+    def __init__(self, team, character="rook", piece_id = 'R'):
+        super().__init__(team, character, piece_id)
 
     def __str__(self):
         if self.team == "white":
@@ -516,10 +521,8 @@ class Rook(Piece):
 class Bishop(Piece):
     """Bishop piece"""
 
-    piece_id = 'B'
-
-    def __init__(self, team, character="bishop"):
-        super().__init__(team, character)
+    def __init__(self, team, character="bishop", piece_id = 'B'):
+        super().__init__(team, character, piece_id)
 
     def __str__(self):
         if self.team == "white":
@@ -541,10 +544,8 @@ class Bishop(Piece):
 class Knight(Piece):
     """Knight piece"""
 
-    piece_id = 'N'
-
-    def __init__(self, team, character="knight"):
-        super().__init__(team, character)
+    def __init__(self, team, character="knight", piece_id = 'N'):
+        super().__init__(team, character, piece_id)
 
     def __str__(self):
         if self.team == "white":
@@ -576,11 +577,10 @@ class Knight(Piece):
 class Pawn(Piece):
     """Pawn piece"""
 
-    def __init__(self, team, character="pawn"):
-        super().__init__(team, character)
+    def __init__(self, team, character="pawn", piece_id = ''):
+        super().__init__(team, character, piece_id)
 
         self.turn = 0
-        self.piece_id = ''
 
     def __str__(self):
         if self.team == "white":
@@ -595,15 +595,6 @@ class Pawn(Piece):
     @turn.setter
     def turn(self, turn):
         self._turn = turn
-
-    @property
-    def piece_id(self):
-        """turn getter and setter"""
-        return self._piece_id
-
-    @piece_id.setter
-    def piece_id(self, piece_id):
-        self._piece_id = piece_id
 
     def posible_taken(self, start: str, board: dict) -> list:
         """
