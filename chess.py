@@ -19,7 +19,7 @@ class Chess:
         """
 
         # History of moves in order <piece> <start position> <end position>
-        self.moves = []
+        self.notation = []
 
         # Moves counter
         self.count = 0
@@ -55,13 +55,13 @@ class Chess:
         self._count = count
 
     @property
-    def moves(self):
+    def notation(self):
         """moves getter and setter"""
-        return self._moves
+        return self._notation
 
-    @moves.setter
-    def moves(self, moves):
-        self._moves = moves
+    @notation.setter
+    def notation(self, notation):
+        self._notation = notation
 
     def board_init(self):
         """
@@ -228,7 +228,6 @@ class Chess:
         Analize by ability function is it posible to get end position.
         Piece can make move or capture oponent piece.
         """
-        
         prompt = self.prompt()
         if prompt == "exit":
             return "exit"
@@ -237,7 +236,7 @@ class Chess:
             return 1
 
         piece, start, end = prompt
-
+        piece_id = self.board[start].piece_id
         posibility_moves, posibility_takens = self.board[start].ability(
             start, self.board
         )
@@ -247,8 +246,7 @@ class Chess:
             self.board[start] = None
 
             # Add move to history
-            stage = f"{piece} {start} {end}"
-            self.moves.append(stage)
+            self.ad_notation(piece_id, start, end)
             self.count += 1
             return None
         if end in posibility_takens:
@@ -257,8 +255,7 @@ class Chess:
             self.board[start] = None
 
             # Add move to history
-            stage = f"{piece} {start} {end}"
-            self.moves.append(stage)
+            self.ad_notation(piece_id, start, end)
             self.count += 1
             return None
         print(f"{piece} can not do that for you")
@@ -274,15 +271,21 @@ class Chess:
             if self.move() == "exit":
                 break
 
+    def ad_notation(self, piece_id, start, end):
+        """ add move to notation """
+        self.notation.append(f'{piece_id}{start[0]}{end}')
+
     def print_notation(self):
         """
         Function print all moves in game
         """
-        if not self.moves:
-            print("No moves")
+        if not self.notation:
+            print("Empty notation")
         else:
-            for line in self.moves:
-                print(line)
+            pairs = zip(self.notation, self.notation[1:])
+            for i, pair in enumerate(pairs):
+                i += 1
+                print(i, pair[0], pair[1])
 
 
 class Piece:
@@ -417,6 +420,8 @@ class Piece:
 class King(Piece):
     """King piece"""
 
+    piece_id = 'K'
+
     def __init__(self, team, character="king"):
         super().__init__(team, character)
 
@@ -449,6 +454,8 @@ class King(Piece):
 
 class Queen(Piece):
     """Queen piece"""
+
+    piece_id = 'Q'
 
     def __init__(self, team, character="queen"):
         super().__init__(team, character)
@@ -483,6 +490,8 @@ class Queen(Piece):
 class Rook(Piece):
     """Rook piece"""
 
+    piece_id = 'R'
+
     def __init__(self, team, character="rook"):
         super().__init__(team, character)
 
@@ -507,6 +516,8 @@ class Rook(Piece):
 class Bishop(Piece):
     """Bishop piece"""
 
+    piece_id = 'B'
+
     def __init__(self, team, character="bishop"):
         super().__init__(team, character)
 
@@ -529,6 +540,8 @@ class Bishop(Piece):
 
 class Knight(Piece):
     """Knight piece"""
+
+    piece_id = 'N'
 
     def __init__(self, team, character="knight"):
         super().__init__(team, character)
@@ -567,6 +580,7 @@ class Pawn(Piece):
         super().__init__(team, character)
 
         self.turn = 0
+        self.piece_id = ''
 
     def __str__(self):
         if self.team == "white":
@@ -581,6 +595,15 @@ class Pawn(Piece):
     @turn.setter
     def turn(self, turn):
         self._turn = turn
+
+    @property
+    def piece_id(self):
+        """turn getter and setter"""
+        return self._piece_id
+
+    @piece_id.setter
+    def piece_id(self, piece_id):
+        self._piece_id = piece_id
 
     def posible_taken(self, start: str, board: dict) -> list:
         """
