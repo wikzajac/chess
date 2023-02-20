@@ -48,6 +48,7 @@ Chess game is a very simple program and need a few more update:
 * check
 * checkmate
 * castling
+* test with more coverage level
 * pawn promotion
 * en passant
 * algebraic notation
