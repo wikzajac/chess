@@ -30,12 +30,6 @@ class Chess:
         # Initiates starting positions on board
         self.board = self.setup(self.board)
 
-        # Main players combat
-        self.game()
-
-        # Print notation
-        self.print_notation()
-
     @property
     def board(self):
         """board getter and setter"""
@@ -63,7 +57,8 @@ class Chess:
     def notation(self, notation: str):
         self._notation = notation
 
-    def board_init(self):
+    @staticmethod
+    def board_init():
         """
         Create empty chess board
 
@@ -76,7 +71,8 @@ class Chess:
                 coordinates_list.append(i + str(j))
         return dict.fromkeys(coordinates_list)
 
-    def setup(self, board: dict):
+    @staticmethod
+    def setup(board: dict):
         """
         Set up chess board
         board dictionary store piece as value
@@ -334,8 +330,8 @@ class Piece:
             raise ValueError("Invalid id")
         self._piece_id = piece_id
 
-    @classmethod
-    def convert_to_numeric(cls, pos: str) -> list:
+    @staticmethod
+    def convert_to_numeric(pos: str) -> list:
         """
         Convert clasic chess coordinates to numeric coordinates
         e.g. d4 to [4, 4]
@@ -345,8 +341,8 @@ class Piece:
         num = ord(pos[0]) - 96
         return [num, int(pos[1])]
 
-    @classmethod
-    def convert_to_alpha(cls, pos: str) -> str:
+    @staticmethod
+    def convert_to_alpha(pos: str) -> str:
         """
         Convert numeric coordinates to clasic chess coordinates
         e.g. [4, 4] to d4
@@ -356,8 +352,8 @@ class Piece:
         alpha = chr(int(pos[0]) + 96)
         return alpha + str(pos[1])
 
-    @classmethod
-    def sum_coordinates(cls, pos1: list, pos2: list) -> list:
+    @staticmethod
+    def sum_coordinates(pos1: list, pos2: list) -> list:
         """
         add numeric coordinates and delta
         :return sum of coordinates
@@ -368,7 +364,8 @@ class Piece:
         pos3.append(pos1[1] + pos2[1])
         return pos3
 
-    def is_it_in_board(self, pos_numeric: list) -> bool:
+    @staticmethod
+    def is_it_in_board(pos_numeric: list) -> bool:
         """
         Check if coordinates is in board
         e.g. [1, 1] -> True, [9, 8] -> False
@@ -579,7 +576,6 @@ class Pawn(Piece):
 
     def __init__(self, team, character="pawn", piece_id = ''):
         super().__init__(team, character, piece_id)
-
         self.turn = 0
 
     def __str__(self):
@@ -652,8 +648,9 @@ class Pawn(Piece):
 
 def main():
     """Iniciacion Chess class"""
-    Chess()
-
+    game = Chess()
+    game.game()
+    game.print_notation()
 
 if __name__ == "__main__":
     main()
